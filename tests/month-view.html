@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+	<script src="../lib/moment.min.js"></script>
+	<script src="../src/jquery.month-view.js"></script>
+    
+	<script>
+		$(document).ready(function() {
+			
+			var $month = $("#currentCalendarContainer").monthView({selectionChanged: function(event,data){
+												var selectedDate = $month.monthView("getSelectedDate");
+												console.log( selectedDate );
+											   }});
+			var nextMonth = new Date();
+			//todo: set to next month
+											   
+											   
+			var $nextMonth = $("#nextCalendarContainer").monthView({selectionChanged: function(event,data){
+												var selectedDate = $nextMonth.monthView("getSelectedDate");
+												console.log( selectedDate );
+											   },
+									  date: nextMonth
+									});
+		  
+		});
+	</script>
+</head>
+<body>
+	<h1>Current Month</h1>
+	<div id="currentCalendarContainer"></div>
+	
+	<h1>Next Month</h1>
+	<div id="nextCalendarContainer"></div>
+	
+</body>
+</html

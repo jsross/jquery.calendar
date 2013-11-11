@@ -1,0 +1,164 @@
+/*
+Copyright (c) 2013 James Ross
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+$.widget( "jsr.calendar", {
+		 
+	// Default options.
+	options: {
+		date: null,
+		currentDate: null,
+		headerDayFormat: "ddd",
+		showDayNames: true,
+		dataFormat: "YYYY-MM-DD",
+		dayFormat: "D",
+		previousButtonText: "Prev",
+		nextButtonText: "Next",
+		headerFormat: "MMMM YYYY"
+	},
+ 
+	_create: function() {
+		this.element.addClass( "calendar" );
+		
+		if(!(this.options.currentDate instanceof Date) ) {
+			this.options.currentDate = new Date();
+		}
+		
+		var currentDay = this.options.currentDate;
+		
+		if(!(this.options.date instanceof Date) ) {
+			this.options.date = new Date();
+		}
+		
+		this.month = moment(this.options.date).startOf("month");
+		var $controls = this._renderControls(this.month);
+		
+		this.controls = $controls;
+		
+		this.element.append($controls);
+		
+		this._monthViewContainer = $("<div>").addClass("month-view-container")
+						     .css("position","relative")
+						     .css("width","100%");
+											 
+		this.element.append(this._monthViewContainer);
+		this.currentMonthView = this._renderMonth(this.month);
+		this._monthViewContainer.append(this.currentMonthView);
+		this._monthViewContainer.height(this.currentMonthView.outerHeight());
+		
+		this.currentMonthView.show();
+	},
+	
+	previousMonth: function() {
+		this.month.add(1,"month");
+		var $monthView = this._renderMonth(this.month);
+		this.currentMonthView = $monthView;
+		
+		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
+		
+		this._swapMonths($monthView, "backwards");
+	},
+	
+	nextMonth: function() {
+		this.month.subtract(1,"month");
+		var $monthView = this._renderMonth(this.month);
+		this.currentMonthView = $monthView;
+		
+		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
+				    
+		this._swapMonths($monthView, "forwards");
+	},
+	
+	getSelectedDate: function () {
+		return this.currentMonthView.monthView('getSelectedDate');
+	},
+	
+	_renderControls: function(renderMoment){
+		var $widget = this;
+		var $previousButton = $("<a>").attr("href","#")
+					      .html(this.options.previousButtonText)
+					      .click(function(event){
+					      		      event.preventDefault();
+					      		      $widget.previousMonth();
+						    });
+		
+		var $nextButton = $("<a>").attr("href","#")
+					  .html(this.options.nextButtonText)
+					  .click(function(e){
+								event.preventDefault();
+								$widget.nextMonth();
+							 });
+		
+		$header = $("<div>").addClass("header")
+				    .html(renderMoment.format(this.options.headerFormat));
+		
+		$controlsContainer = $("<div>").addClass("controls-container")
+					       .append($("<div>").addClass("previous-container").append($previousButton))
+					       .append($header)
+					       .append($("<div>").addClass("next-container").append($nextButton));
+									   
+		return $controlsContainer;
+	},
+	
+	_renderMonth: function(month) {
+		$widget = this;
+		return $("<div>").monthView({
+						date: month.toDate(),
+						staticRowCount: true,
+						selectionChanged: function(){$widget._handleMonthViewSelectionChange();}
+					    }).css("position","absolute")
+					      .css("width","100%")
+					      .css("height","auto")
+					      .hide();
+	},
+	
+	_handleMonthViewSelectionChange: function() {
+		this._trigger("selectionChanged");
+	},
+	
+	_swapMonths: function($newSlide, direction) {
+		var $container = this._monthViewContainer;
+		var $oldSlide = $container.find(".month-view");
+		$container.append($newSlide);
+		var oldHeight = $oldSlide.outerHeight();
+		var newHeight = $newSlide.outerHeight();
+
+		if(newHeight > oldHeight) {
+			$container.animate({height:newHeight},200);
+		}
+		
+		if(direction == 'forwards') {
+			$oldSlide.hide('slide', {direction: 'left'}, 1000, function(){$oldSlide.remove()});
+			$newSlide.show('slide', {direction: 'right'}, 1000, function(){
+										if(newHeight < oldHeight) {
+											$container.animate({height:newHeight},200);
+										}																			 
+									    });
+		}
+		else if (direction == 'backwards') {
+			$oldSlide.hide('slide', {direction: 'right'}, 1000,function(){$oldSlide.remove()});
+			$newSlide.show('slide', {direction: 'left'}, 1000, function(){
+										if(newHeight < oldHeight) {
+											$container.animate({height:newHeight},200);
+										}
+									   });
+		}		
+	}
+});

@@ -1,0 +1,41 @@
+
+.month-view > table {
+	width: 100%;
+	border-collapse:collapse;
+}
+
+.month-view > table td {
+	text-align:center;
+	vertical-align: middle;
+	border: 2px solid #cccccc;
+}
+
+.month-view > table td.previous-month a,
+.month-view > table td.next-month a {
+	color: #cccccc;
+}
+
+.month-view > table td.selected {
+	background-color: #B1B1B1;
+}
+
+.month-view > table td.selected a {
+	color: #ffffff;
+}
+
+.controls-container {
+	display: table;
+	width:100%;
+}
+
+.controls-container > div {
+	display: table-cell;
+}
+
+.header {
+	text-align:center;
+}
+
+.next-container {
+	text-align:right;
+}
