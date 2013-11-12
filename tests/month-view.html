@@ -14,8 +14,7 @@
 												var selectedDate = $month.monthView("getSelectedDate");
 												console.log( selectedDate );
 											   }});
-			var nextMonth = new Date();
-			//todo: set to next month
+			var nextMonth = new Date(2013,5,1,0,0,0,0);
 											   
 											   
 			var $nextMonth = $("#nextCalendarContainer").monthView({selectionChanged: function(event,data){
@@ -32,7 +31,7 @@
 	<h1>Current Month</h1>
 	<div id="currentCalendarContainer"></div>
 	
-	<h1>Next Month</h1>
+	<h1>Second Month</h1>
 	<div id="nextCalendarContainer"></div>
 	
 </body>
