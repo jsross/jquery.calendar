@@ -57,8 +57,6 @@ $.widget( "jsr.monthView", {
 		var dayCell = this.getDayCell(date);
 		
 		dayCell.addClass("selected");
-
-		this._trigger("selectionChanged");
 	},
 	
 	getDayCell: function(date) {
@@ -76,6 +74,18 @@ $.widget( "jsr.monthView", {
 		var selectedDate = moment(dataDate,this.options.dataFormat).toDate();
 		
 		return selectedDate;
+	},
+	
+	_handleDayClick: function(event) {
+		event.preventDefault();
+		
+		var $triggered = $(event.target);
+		var $parent = $triggered.parent();
+		var dataDate = $parent.attr("data-date");
+		var selectedDate = moment(dataDate,this.options.dataFormat).toDate();
+		
+		this.changeSelection(selectedDate);
+		this._trigger("selectionChanged", event, selectedDate);
 	},
 	
 	_renderMonth: function(renderMonth) {
@@ -156,14 +166,7 @@ $.widget( "jsr.monthView", {
 					
 		var $widget = this;
 		
-		$dayLink.click(function(e) {
-			e.preventDefault();
-			var $parent = $(this).parent();
-			var dataDate = $parent.attr("data-date");
-			var selectedDate = moment(dataDate,$widget.options.dataFormat).toDate();
-			
-			$widget.changeSelection(selectedDate);
-		});
+		$dayLink.click($.proxy(this._handleDayClick,this));
 		
 		return $dayLink;
 	}

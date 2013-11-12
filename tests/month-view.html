@@ -11,15 +11,13 @@
 		$(document).ready(function() {
 			
 			var $month = $("#currentCalendarContainer").monthView({selectionChanged: function(event,data){
-												var selectedDate = $month.monthView("getSelectedDate");
-												console.log( selectedDate );
+												console.log( data );
 											   }});
 			var nextMonth = new Date(2013,5,1,0,0,0,0);
 											   
 											   
 			var $nextMonth = $("#nextCalendarContainer").monthView({selectionChanged: function(event,data){
-												var selectedDate = $nextMonth.monthView("getSelectedDate");
-												console.log( selectedDate );
+												console.log( data );
 											   },
 									  date: nextMonth
 									});
