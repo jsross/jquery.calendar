@@ -11,8 +11,8 @@
     
 	<script>
 		$(document).ready(function() {
-		  var $month = $("#calendarContainer").calendar({selectionChanged: function(){
-		  									console.log("Selection changed");
+		  var $month = $("#calendarContainer").calendar({selectionChanged: function(event,data){
+		  									console.log(data);
 		  								   }
 		  						});
 		  $("#selectedButton").click(function(){

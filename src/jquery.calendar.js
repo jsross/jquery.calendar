@@ -122,15 +122,15 @@ $.widget( "jsr.calendar", {
 		return $("<div>").monthView({
 						date: month.toDate(),
 						staticRowCount: true,
-						selectionChanged: function(){$widget._handleMonthViewSelectionChange();}
+						selectionChanged: $.proxy(this._handleMonthViewSelectionChange,this)
 					    }).css("position","absolute")
 					      .css("width","100%")
 					      .css("height","auto")
 					      .hide();
 	},
 	
-	_handleMonthViewSelectionChange: function() {
-		this._trigger("selectionChanged");
+	_handleMonthViewSelectionChange: function(event, data) {
+		this._trigger("selectionChanged",event,data);
 	},
 	
 	_swapMonths: function($newSlide, direction) {
