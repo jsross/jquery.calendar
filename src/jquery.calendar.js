@@ -67,7 +67,7 @@ $.widget( "jsr.calendar", {
 	},
 	
 	previousMonth: function() {
-		this.month.add(1,"month");
+		this.month.subtract(1,"month");
 		var $monthView = this._renderMonth(this.month);
 		this.currentMonthView = $monthView;
 		
@@ -77,7 +77,7 @@ $.widget( "jsr.calendar", {
 	},
 	
 	nextMonth: function() {
-		this.month.subtract(1,"month");
+		this.month.add(1,"month");
 		var $monthView = this._renderMonth(this.month);
 		this.currentMonthView = $monthView;
 		
