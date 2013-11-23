@@ -44,7 +44,7 @@ $.widget( "jsr.monthView", {
 		if(!(this.options.date instanceof Date) ) {
 			this.options.date = new Date();
 		}
-		
+		this.selectedCell = null;
 		this.options.date = moment(this.options.date).startOf("month");
 		
 		var $monthView = this._renderMonth(moment(this.options.date));
@@ -53,10 +53,13 @@ $.widget( "jsr.monthView", {
 	},
 	
 	changeSelection: function(date) {
-		this.element.find(".selected").removeClass("selected");	
-		var dayCell = this.getDayCell(date);
+		if(this.selectedCell != null) {
+			this.selectedCell.removeClass("selected");
+		}
 		
+		var dayCell = this.getDayCell(date);
 		dayCell.addClass("selected");
+		this.selectedCell = dayCell;
 	},
 	
 	getDayCell: function(date) {
@@ -67,41 +70,39 @@ $.widget( "jsr.monthView", {
 	},
 	
 	getSelectedDate: function() {
-		var $selected = this.element.find(".selected").first();
-		if($selected.length == 0)
+		if(this.selectedCell == null)
 			return null;
-		var dataDate = $selected.attr("data-date");
+		
+		var dataDate = this.selectedCell.attr("data-date");
 		var selectedDate = moment(dataDate,this.options.dataFormat).toDate();
 		
 		return selectedDate;
 	},
 	
 	getSelectedCell: function() {
-		var $selected = this.element.find(".selected").first();
-		
-		if($selected.length == 0)
-			return null;
-		
-		return $selected;
+		return this.selectedCell;
 	},
 	
 	_handleDayClick: function(event) {
 		event.preventDefault();
+	
+		var $toggled = $(event.target).parent();
 		
-		var $triggered = $(event.target);
-		var $parentCell = $triggered.parent();
-		var $currentSelection = this.getSelectedCell();
-		
-		if($currentSelection != null && $parentCell[0] == $currentSelection[0]){
-			$currentSelection.removeClass("selected");
+		if(this.selectedCell != null && $toggled[0] == this.selectedCell[0]){
+			this.selectedCell.removeClass("selected");
+			this.selectedCell = null;
 			this._trigger("selectionChanged", event);
 			
 			return;
 		}
-
-		this.element.find(".selected").removeClass("selected");
-		$parentCell.addClass("selected");
-		var selectedDate = moment($parentCell.attr("data-date"),this.options.dataFormat).toDate();
+		
+		if(this.selectedCell != null)
+			this.selectedCell.removeClass("selected");
+		
+		$toggled.addClass("selected");
+		this.selectedCell = $toggled;
+		
+		var selectedDate = moment($toggled.attr("data-date"),this.options.dataFormat).toDate();
 		
 		this._trigger("selectionChanged", event, selectedDate);
 	},
