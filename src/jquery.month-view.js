@@ -29,7 +29,8 @@ $.widget( "jsr.monthView", {
 		showDayNames: true,
 		dataFormat: "YYYY-MM-DD",
 		dayFormat: "D",
-		staticRowCount: false
+		staticRowCount: false,
+		selectedClass: "selected"
 	},
  
 	_create: function() {
@@ -54,11 +55,11 @@ $.widget( "jsr.monthView", {
 	
 	changeSelection: function(date) {
 		if(this.selectedCell != null) {
-			this.selectedCell.removeClass("selected");
+			this.selectedCell.removeClass(this.options.selectedClass);
 		}
 		
 		var dayCell = this.getDayCell(date);
-		dayCell.addClass("selected");
+		dayCell.addClass(this.options.selectedClass);
 		this.selectedCell = dayCell;
 	},
 	
@@ -89,7 +90,7 @@ $.widget( "jsr.monthView", {
 		var $toggled = $(event.target).parent();
 		
 		if(this.selectedCell != null && $toggled[0] == this.selectedCell[0]){
-			this.selectedCell.removeClass("selected");
+			this.selectedCell.removeClass(this.options.selectedClass);
 			this.selectedCell = null;
 			this._trigger("selectionChanged", event);
 			
@@ -97,9 +98,9 @@ $.widget( "jsr.monthView", {
 		}
 		
 		if(this.selectedCell != null)
-			this.selectedCell.removeClass("selected");
+			this.selectedCell.removeClass(this.options.selectedClass);
 		
-		$toggled.addClass("selected");
+		$toggled.addClass(this.options.selectedClass);
 		this.selectedCell = $toggled;
 		
 		var selectedDate = moment($toggled.attr("data-date"),this.options.dataFormat).toDate();
