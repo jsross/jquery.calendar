@@ -76,15 +76,33 @@ $.widget( "jsr.monthView", {
 		return selectedDate;
 	},
 	
+	getSelectedCell: function() {
+		var $selected = this.element.find(".selected").first();
+		
+		if($selected.length == 0)
+			return null;
+		
+		return $selected;
+	},
+	
 	_handleDayClick: function(event) {
 		event.preventDefault();
 		
 		var $triggered = $(event.target);
-		var $parent = $triggered.parent();
-		var dataDate = $parent.attr("data-date");
-		var selectedDate = moment(dataDate,this.options.dataFormat).toDate();
+		var $parentCell = $triggered.parent();
+		var $currentSelection = this.getSelectedCell();
 		
-		this.changeSelection(selectedDate);
+		if($currentSelection != null && $parentCell[0] == $currentSelection[0]){
+			$currentSelection.removeClass("selected");
+			this._trigger("selectionChanged", event);
+			
+			return;
+		}
+
+		this.element.find(".selected").removeClass("selected");
+		$parentCell.addClass("selected");
+		var selectedDate = moment($parentCell.attr("data-date"),this.options.dataFormat).toDate();
+		
 		this._trigger("selectionChanged", event, selectedDate);
 	},
 	
