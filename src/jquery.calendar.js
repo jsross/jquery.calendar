@@ -54,14 +54,13 @@ $.widget( "jsr.calendar", {
 		
 		this.element.append($controls);
 		
-		this._monthViewContainer = $("<div>").addClass("month-view-container")
-						     .css("position","relative")
-						     .css("width","100%");
+		this.mainContainer = $("<div>").css("position","relative")
+						.css("width","100%");
 											 
-		this.element.append(this._monthViewContainer);
+		this.element.append(this.mainContainer);
 		this.currentMonthView = this._renderMonth(this.month);
-		this._monthViewContainer.append(this.currentMonthView);
-		this._monthViewContainer.height(this.currentMonthView.outerHeight());
+		this.mainContainer.append(this.currentMonthView);
+		this.mainContainer.height(this.currentMonthView.outerHeight());
 		
 		this.currentMonthView.show();
 	},
@@ -73,7 +72,7 @@ $.widget( "jsr.calendar", {
 		
 		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
 		
-		this._swapMonths($monthView, "backwards");
+		this._swapMainContainerView($monthView, "backwards");
 	},
 	
 	nextMonth: function() {
@@ -83,7 +82,7 @@ $.widget( "jsr.calendar", {
 		
 		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
 				    
-		this._swapMonths($monthView, "forwards");
+		this._swapMainContainerView($monthView, "forwards");
 	},
 	
 	getSelectedDate: function () {
@@ -137,8 +136,8 @@ $.widget( "jsr.calendar", {
 		this._trigger("selectionChanged",event,data);
 	},
 	
-	_swapMonths: function($newSlide, direction) {
-		var $container = this._monthViewContainer;
+	_swapMainContainerView: function($newSlide, direction) {
+		var $container = this.mainContainer;
 		var $oldSlide = $container.children();
 		$container.append($newSlide);
 		var oldHeight = $oldSlide.outerHeight();
