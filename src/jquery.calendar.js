@@ -91,20 +91,13 @@ $.widget( "jsr.calendar", {
 	},
 	
 	_renderControls: function(renderMoment){
-		var $widget = this;
 		var $previousButton = $("<a>").attr("href","#")
 					      .html(this.options.previousButtonText)
-					      .click(function(event){
-					      		      event.preventDefault();
-					      		      $widget.previousMonth();
-						    });
+					      .click($.proxy(this._handlePreviousButtonClick,this));
 		
 		var $nextButton = $("<a>").attr("href","#")
 					  .html(this.options.nextButtonText)
-					  .click(function(e){
-								event.preventDefault();
-								$widget.nextMonth();
-							 });
+					  .click($.proxy(this._handleNextButtonClick,this));
 		
 		$header = $("<div>").addClass("header")
 				    .html(renderMoment.format(this.options.headerFormat));
@@ -118,7 +111,6 @@ $.widget( "jsr.calendar", {
 	},
 	
 	_renderMonth: function(month) {
-		$widget = this;
 		return $("<div>").monthView({
 						date: month.toDate(),
 						staticRowCount: true,
@@ -127,6 +119,18 @@ $.widget( "jsr.calendar", {
 					      .css("width","100%")
 					      .css("height","auto")
 					      .hide();
+	},
+	
+	_handlePreviousButtonClick: function(event) {
+		event.preventDefault();
+		var selectedDate = this.getSelectedDate();
+		this.previousMonth();
+	},
+	
+	_handleNextButtonClick: function(event) {
+		event.preventDefault();
+		var selectedDate = this.getSelectedDate();
+		this.nextMonth();
 	},
 	
 	_handleMonthViewSelectionChange: function(event, data) {
