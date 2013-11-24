@@ -57,3 +57,16 @@
 .next-container {
 	text-align:right;
 }
+
+
+.month-selector table {
+	width:100%;
+	height: 100%;
+	border-collapse:collapse;
+	table-layout: fixed;
+}
+
+.month-selector table td {
+	text-align: center;
+	vertical-align: middle;
+}
