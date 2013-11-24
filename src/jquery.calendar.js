@@ -101,7 +101,7 @@ $.widget( "jsr.calendar", {
 		
 		$header = $("<div>").addClass("header")
 				    .html(renderMoment.format(this.options.headerFormat));
-		
+
 		$controlsContainer = $("<div>").addClass("controls-container")
 					       .append($("<div>").addClass("previous-container").append($previousButton))
 					       .append($header)
@@ -139,7 +139,7 @@ $.widget( "jsr.calendar", {
 	
 	_swapMonths: function($newSlide, direction) {
 		var $container = this._monthViewContainer;
-		var $oldSlide = $container.find(".month-view");
+		var $oldSlide = $container.children();
 		$container.append($newSlide);
 		var oldHeight = $oldSlide.outerHeight();
 		var newHeight = $newSlide.outerHeight();
@@ -148,21 +148,33 @@ $.widget( "jsr.calendar", {
 			$container.animate({height:newHeight},200);
 		}
 		
-		if(direction == 'forwards') {
-			$oldSlide.hide('slide', {direction: 'left'}, 1000, function(){$oldSlide.remove()});
-			$newSlide.show('slide', {direction: 'right'}, 1000, function(){
-										if(newHeight < oldHeight) {
-											$container.animate({height:newHeight},200);
-										}																			 
-									    });
+		var hideDirection = 'none';
+		var showDirection = 'none';
+		
+		switch(direction) {
+			case "forwards":
+				hideDirection = "left";
+				showDirection = "right";
+			break;
+			case "backwards":
+				hideDirection = "right";
+				showDirection = "left";
+			break;
+			case "down":
+				hideDirection = "down";
+				showDirection = "up";
+			break;
+			case "up":
+				hideDirection = "up";
+				showDirection = "down";
+			break;
 		}
-		else if (direction == 'backwards') {
-			$oldSlide.hide('slide', {direction: 'right'}, 1000,function(){$oldSlide.remove()});
-			$newSlide.show('slide', {direction: 'left'}, 1000, function(){
-										if(newHeight < oldHeight) {
-											$container.animate({height:newHeight},200);
-										}
-									   });
-		}		
+		
+		$oldSlide.hide('slide', {direction: hideDirection}, 1000, function(){$oldSlide.remove()});
+		$newSlide.show('slide', {direction: showDirection}, 1000, function(){
+									if(newHeight < oldHeight) {
+										$container.animate({height:newHeight},200);
+									}																			 
+								    });
 	}
 });
