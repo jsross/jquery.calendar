@@ -31,8 +31,12 @@ $.widget( "jsr.calendar", {
 		dayFormat: "D",
 		previousButtonText: "Prev",
 		nextButtonText: "Next",
-		headerFormat: "MMMM YYYY"
+		headerFormat: "MMMM YYYY",
+		headerYearFormat: "YYYY"
 	},
+	
+	_monthView: "monthView",
+	_monthSelector: "monthSelector",
  
 	_create: function() {
 		this.element.addClass( "calendar" );
@@ -58,35 +62,36 @@ $.widget( "jsr.calendar", {
 						.css("width","100%");
 											 
 		this.element.append(this.mainContainer);
-		this.currentMonthView = this._renderMonth(this.month);
-		this.mainContainer.append(this.currentMonthView);
-		this.mainContainer.height(this.currentMonthView.outerHeight());
+		this.currentView = this._renderMonth(this.month);
+		this.mainContainer.append(this.currentView);
+		this.mainContainer.height(this.currentView.outerHeight());
+		this.viewState = this._monthView;
 		
-		this.currentMonthView.show();
+		this.currentView.show();
 	},
 	
 	previousMonth: function() {
 		this.month.subtract(1,"month");
 		var $monthView = this._renderMonth(this.month);
-		this.currentMonthView = $monthView;
-		
-		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
-		
+
+		this._setHeaderText(this.month.format(this.options.headerFormat));
 		this._swapMainContainerView($monthView, "backwards");
 	},
 	
 	nextMonth: function() {
 		this.month.add(1,"month");
 		var $monthView = this._renderMonth(this.month);
-		this.currentMonthView = $monthView;
 		
-		this.controls.find(".header").html(this.month.format(this.options.headerFormat));
-				    
+		this._setHeaderText(this.month.format(this.options.headerFormat));
 		this._swapMainContainerView($monthView, "forwards");
 	},
 	
 	getSelectedDate: function () {
-		return this.currentMonthView.monthView('getSelectedDate');
+		return this.currentView.monthView('getSelectedDate');
+	},
+	
+	_setHeaderText: function(text) {
+		this.controls.find(".header-button").html(text);
 	},
 	
 	_renderControls: function(renderMoment){
@@ -98,8 +103,12 @@ $.widget( "jsr.calendar", {
 					  .html(this.options.nextButtonText)
 					  .click($.proxy(this._handleNextButtonClick,this));
 		
-		$header = $("<div>").addClass("header")
-				    .html(renderMoment.format(this.options.headerFormat));
+		var $headerButton = $("<a>").attr("href","#")
+					    .addClass("header-button")
+					    .html(renderMoment.format(this.options.headerFormat))
+					    .click($.proxy(this._handleHeaderButtonClick,this));
+					
+		var $header = $("<div>").addClass("header").append($headerButton);
 
 		$controlsContainer = $("<div>").addClass("controls-container")
 					       .append($("<div>").addClass("previous-container").append($previousButton))
@@ -120,16 +129,51 @@ $.widget( "jsr.calendar", {
 					      .hide();
 	},
 	
+	_renderMonthSelector: function(date) {
+		return $("<div>").monthSelector({
+						year: date,
+						monthSelected: $.proxy(this._handleMonthSelected,this)
+					    }).css("position","absolute")
+					      .css("width","100%")
+					      .css("height","100%")
+					      .hide();
+	},
+	
+	_handleHeaderButtonClick: function(event) {
+		event.preventDefault();
+		
+		if(this.viewState == this._monthView) {
+			var $selectorView = this._renderMonthSelector(this.month.toDate());
+			this.viewState = this._monthSelector;
+			this._setHeaderText(this.month.format(this.options.headerYearFormat));
+			this._swapMainContainerView($selectorView, "down");
+		}
+	},
+	
+	_handleMonthSelected: function(event, data) {
+		var $monthView = this._renderMonth(moment(data));
+		this.month = moment(data);
+		var headerText = this.month.format(this.options.headerFormat);
+		this._setHeaderText(headerText);
+				    
+		this._swapMainContainerView($monthView, "up");
+		this.viewState = this._monthView;
+	},
+	
 	_handlePreviousButtonClick: function(event) {
 		event.preventDefault();
-		var selectedDate = this.getSelectedDate();
-		this.previousMonth();
+		
+		if(this.viewState == this._monthView) {
+			this.previousMonth();
+		}
 	},
 	
 	_handleNextButtonClick: function(event) {
 		event.preventDefault();
-		var selectedDate = this.getSelectedDate();
-		this.nextMonth();
+		
+		if(this.viewState == this._monthView) {
+			this.nextMonth();
+		}
 	},
 	
 	_handleMonthViewSelectionChange: function(event, data) {
@@ -137,6 +181,7 @@ $.widget( "jsr.calendar", {
 	},
 	
 	_swapMainContainerView: function($newSlide, direction) {
+		this.currentView = $newSlide;
 		var $container = this.mainContainer;
 		var $oldSlide = $container.children();
 		$container.append($newSlide);
