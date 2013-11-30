@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="css/theme.css" />
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+	<script src="../lib/moment.min.js"></script>
+	<script src="../src/jquery.year-selector.js"></script>
+    
+	<script>
+		$(document).ready(function() {
+			var $month = $("#year-selector").yearSelector({ startYear: new Date(2000, 0, 1),
+									yearSelected: function(event,data){
+		  									console.log(data);
+		  								   }
+		  							});
+		});
+	</script>
+	<style>
+		#year-selector {
+			width:200px;
+		}
+	</style>
+</head>
+<body>
+	<div id="year-selector"/>
+</body>
+</html
