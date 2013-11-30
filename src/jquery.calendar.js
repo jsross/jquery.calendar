@@ -37,6 +37,7 @@ $.widget( "jsr.calendar", {
 	
 	_monthView: "monthView",
 	_monthSelector: "monthSelector",
+	_yearSelector: "yearSelector",
  
 	_create: function() {
 		this.element.addClass( "calendar" );
@@ -51,8 +52,8 @@ $.widget( "jsr.calendar", {
 			this.options.date = new Date();
 		}
 		
-		this.month = moment(this.options.date).startOf("month");
-		var $controls = this._renderControls(this.month);
+		this.rangeStart = moment(this.options.date).startOf("month");
+		var $controls = this._renderControls(this.rangeStart);
 		
 		this.controls = $controls;
 		
@@ -62,7 +63,7 @@ $.widget( "jsr.calendar", {
 						.css("width","100%");
 											 
 		this.element.append(this.mainContainer);
-		this.currentView = this._renderMonth(this.month);
+		this.currentView = this._renderMonth(this.rangeStart);
 		this.mainContainer.append(this.currentView);
 		this.mainContainer.height(this.currentView.outerHeight());
 		this.viewState = this._monthView;
@@ -71,23 +72,62 @@ $.widget( "jsr.calendar", {
 	},
 	
 	previousMonth: function() {
-		this.month.subtract(1,"month");
-		var $monthView = this._renderMonth(this.month);
+		this.rangeStart.subtract(1,"month");
+		var $monthView = this._renderMonth(this.rangeStart);
 
-		this._setHeaderText(this.month.format(this.options.headerFormat));
+		this._setHeaderText(this.rangeStart.format(this.options.headerFormat));
 		this._swapMainContainerView($monthView, "backwards");
 	},
 	
 	nextMonth: function() {
-		this.month.add(1,"month");
-		var $monthView = this._renderMonth(this.month);
+		this.rangeStart.add(1,"month");
+		var $monthView = this._renderMonth(this.rangeStart);
 		
-		this._setHeaderText(this.month.format(this.options.headerFormat));
+		this._setHeaderText(this.rangeStart.format(this.options.headerFormat));
 		this._swapMainContainerView($monthView, "forwards");
 	},
 	
 	getSelectedDate: function () {
 		return this.currentView.monthView('getSelectedDate');
+	},
+	
+	_previousYear: function() {
+		this.rangeStart.subtract(1,"year");
+		
+		var $selectorView = this._renderMonthSelector(this.rangeStart.toDate());
+		this._setHeaderText(this.rangeStart.format(this.options.headerYearFormat));
+		this._swapMainContainerView($selectorView, "backwards");
+	},
+	
+	_nextYear: function() {
+		this.rangeStart.add(1,"year");
+		
+		var $selectorView = this._renderMonthSelector(this.rangeStart.toDate());
+		this._setHeaderText(this.rangeStart.format(this.options.headerYearFormat));
+		this._swapMainContainerView($selectorView, "forwards");
+	},
+	
+	_previousQuarter: function() {
+		this.rangeStart.subtract(25,"year");
+		
+		var $selectorView = this._renderYearSelector(this.rangeStart.toDate());
+		var headerText = this.rangeStart.format(this.options.headerYearFormat)
+				       + " - "
+				       + moment(this.rangeStart).add(24,"year").format(this.options.headerYearFormat);
+			
+		this._setHeaderText(headerText);
+		this._swapMainContainerView($selectorView, "backwards");
+	},
+	
+	_nextQuarter: function() {
+		this.rangeStart.add(25,"year");
+		
+		var $selectorView = this._renderYearSelector(this.rangeStart.toDate());
+		var headerText = this.rangeStart.format(this.options.headerYearFormat)
+				       + " - "
+				       + moment(this.rangeStart).add(24,"year").format(this.options.headerYearFormat);
+		this._setHeaderText(headerText);
+		this._swapMainContainerView($selectorView, "forwards");
 	},
 	
 	_setHeaderText: function(text) {
@@ -139,21 +179,51 @@ $.widget( "jsr.calendar", {
 					      .hide();
 	},
 	
+	_renderYearSelector: function(date) {
+		return $("<div>").yearSelector({
+						startYear: date,
+						yearSelected: $.proxy(this._handleYearSelected,this)
+					    }).css("position","absolute")
+					      .css("width","100%")
+					      .css("height","100%")
+					      .hide();
+	},
+	
 	_handleHeaderButtonClick: function(event) {
 		event.preventDefault();
 		
 		if(this.viewState == this._monthView) {
-			var $selectorView = this._renderMonthSelector(this.month.toDate());
+			var $selectorView = this._renderMonthSelector(this.rangeStart.toDate());
 			this.viewState = this._monthSelector;
-			this._setHeaderText(this.month.format(this.options.headerYearFormat));
+			this._setHeaderText(this.rangeStart.format(this.options.headerYearFormat));
+			this._swapMainContainerView($selectorView, "down");
+		}
+		else if(this.viewState == this._monthSelector) {
+			var year = Math.floor((this.rangeStart.year() / 25)) * 25;
+			this.rangeStart = moment(new Date(year, 0, 1));
+			var $selectorView = this._renderYearSelector(this.rangeStart.toDate());
+			this.viewState = this._yearSelector;
+			var headerText = this.rangeStart.format(this.options.headerYearFormat)
+				       + " - "
+				       + moment(this.rangeStart).add(24,"year").format(this.options.headerYearFormat);
+				       
+			this._setHeaderText(headerText);
 			this._swapMainContainerView($selectorView, "down");
 		}
 	},
 	
+	_handleYearSelected: function(event, data) {
+		this.rangeStart = moment(data);
+		var $view = this._renderMonthSelector(data);
+		this._setHeaderText(this.rangeStart.format(this.options.headerYearFormat));	    
+		this._swapMainContainerView($view, "up");
+		this.viewState = this._monthSelector;
+	},
+	
 	_handleMonthSelected: function(event, data) {
 		var $monthView = this._renderMonth(moment(data));
-		this.month = moment(data);
-		var headerText = this.month.format(this.options.headerFormat);
+		this.rangeStart = moment(data);
+		var headerText = this.rangeStart.format(this.options.headerFormat);
 		this._setHeaderText(headerText);
 				    
 		this._swapMainContainerView($monthView, "up");
@@ -166,6 +236,12 @@ $.widget( "jsr.calendar", {
 		if(this.viewState == this._monthView) {
 			this.previousMonth();
 		}
+		else if(this.viewState == this._monthSelector) {
+			this._previousYear();
+		}
+		else if(this.viewState == this._yearSelector) {
+			this._previousQuarter();
+		}
 	},
 	
 	_handleNextButtonClick: function(event) {
@@ -173,6 +249,12 @@ $.widget( "jsr.calendar", {
 		
 		if(this.viewState == this._monthView) {
 			this.nextMonth();
+		}
+		else if(this.viewState == this._monthSelector) {
+			this._nextYear();
+		}
+		else if(this.viewState == this._yearSelector) {
+			this._nextQuarter();
 		}
 	},
 	

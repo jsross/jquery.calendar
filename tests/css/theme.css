@@ -70,3 +70,15 @@
 	text-align: center;
 	vertical-align: middle;
 }
+
+.year-selector table {
+	width:100%;
+	height: 100%;
+	border-collapse:collapse;
+	table-layout: fixed;
+}
+
+.year-selector table td {
+	text-align: center;
+	vertical-align: middle;
+}
