@@ -41,6 +41,7 @@ $.widget( "jsr.calendar", {
  
 	_create: function() {
 		this.element.addClass( "calendar" );
+		this.animationQueue = [];
 		
 		if(!(this.options.currentDate instanceof Date) ) {
 			this.options.currentDate = new Date();
@@ -263,21 +264,42 @@ $.widget( "jsr.calendar", {
 	},
 	
 	_swapMainContainerView: function($newSlide, direction) {
-		this.currentView = $newSlide;
-		var $container = this.mainContainer;
-		var $oldSlide = $container.children();
-		$container.append($newSlide);
-		var oldHeight = $oldSlide.outerHeight();
-		var newHeight = $newSlide.outerHeight();
-
-		if(newHeight > oldHeight) {
-			$container.animate({height:newHeight},200);
+		this.animationQueue.push({view: $newSlide, direction: direction});
+		
+		if(this.animationInProgress) {
+			return;
 		}
+		
+		this.animationInProgress = true;
+		var self = this;
+		setTimeout( function(){ self._doSwap();}, 200 );
+	},
+	
+	_doSwap: function() {
+		if(this.animationQueue.length <= 0) {
+			this.animationInProgress = false;
+			
+			return;
+		}
+		
+		var easing = "easeOutExpo";
+		
+		if(this.animationQueue.length > 1) {
+			var easing = "linear";
+		}
+		
+		var duration = Math.floor(1000 / (this.animationQueue.length * this.animationQueue.length));
+		var animation = this.animationQueue.shift();
+		
+		this.currentView = animation.view;
+		
+		var $previousView = this.mainContainer.children();
+		this.mainContainer.append(this.currentView);
 		
 		var hideDirection = 'none';
 		var showDirection = 'none';
 		
-		switch(direction) {
+		switch(animation.direction) {
 			case "forwards":
 				hideDirection = "left";
 				showDirection = "right";
@@ -296,11 +318,9 @@ $.widget( "jsr.calendar", {
 			break;
 		}
 		
-		$oldSlide.hide('slide', {direction: hideDirection}, 1000, function(){$oldSlide.remove()});
-		$newSlide.show('slide', {direction: showDirection}, 1000, function(){
-									if(newHeight < oldHeight) {
-										$container.animate({height:newHeight},200);
-									}																			 
-								    });
+		var self = this;
+		$previousView.hide('slide', {direction: hideDirection, easing: easing}, duration, function(){$previousView.remove()});
+		this.currentView.show('slide', {direction: showDirection,easing: easing}, duration, function(){self._doSwap();});
 	}
+	
 });
